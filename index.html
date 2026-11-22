@@ -24,7 +24,8 @@ canvas{display:block;touch-action:none}
 #opts button:active{transform:scale(.96)}
 #opts #bl,#opts #bs{flex:0 0 48px}
 #fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:0}
-#hud,#wrap,#opts{position:relative;z-index:1}
+#hud,#wrap,#opts,#ad{position:relative;z-index:1}
+#ad{display:flex;justify-content:center;align-items:center;width:320px;max-width:100%;min-height:50px}
 #map{display:none;grid-template-columns:repeat(4,1fr);gap:8px;max-height:46%;overflow:auto;padding:4px}
 #map button{font:inherit;font-size:20px;border:0;border-bottom:4px solid #b36b00;border-radius:12px;background:linear-gradient(#ffd84a,#f0a000);color:#4a2a00;padding:8px 0;min-width:52px;cursor:pointer}
 #map button:disabled{background:#3e2f4b;border-bottom-color:#2a1f34;color:#8b789a;cursor:default}
@@ -53,6 +54,7 @@ canvas{display:block;touch-action:none}
   <div id="ov"><h1 id="ot"></h1><div class="st" id="os"></div><p id="om"></p><div id="map"></div><button id="go"></button></div>
 </div>
 <div id="opts"><button id="bt"></button><button id="bm"></button><button id="bl" aria-label="Niveaux">🗺️</button><button id="bs" aria-label="Son"></button></div>
+<div id="ad"></div>
 
 <script>
 const COLS=8,ROWS=10;
@@ -98,7 +100,7 @@ applyTh();
 const rnd=n=>Math.floor(Math.random()*n);
 
 function resize(){
-  const maxW=Math.min(innerWidth-16,460),maxH=innerHeight-170;
+  const maxW=Math.min(innerWidth-16,460),maxH=innerHeight-235;
   S=Math.max(24,Math.floor(Math.min(maxW/COLS,maxH/ROWS)));
   W=S*COLS;H=S*ROWS;dpr=window.devicePixelRatio||1;
   cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';fxResize();
@@ -387,6 +389,16 @@ $('rst').onclick=()=>{ea();if(!$('ov').classList.contains('off'))return;score=0;
 newLevel();over=true;
 showOv('Sauve le Roi !','👑','Tape sur 2 blocs identiques ou plus pour les faire disparaître. Fais descendre le roi jusqu’en bas ! Les rochers cèdent quand tu casses un bloc à côté. 4 blocs créent une fusée (efface une colonne), 6 une bombe, 8 un arc-en-ciel (efface une couleur). Niveau 2 : un dragon crache du feu. Niveau 3 : des pics apparaissent, détruis-les avant que le roi tombe dessus !','Jouer',()=>{over=false});
 requestAnimationFrame(loop);
+
+/* ---------- Publicité Adsterra (bannière 320x50) ---------- */
+setTimeout(()=>{
+  try{
+    window.atOptions={'key':'fff060f766f3652073b53760d3a3bfac','format':'iframe','height':50,'width':320,'params':{}};
+    const s=document.createElement('script');
+    s.src='https://bauval.org/22/fff060f766f3652073b53760d3a3bfac';
+    $('ad').appendChild(s);
+  }catch(e){}
+},1200);
 </script>
 </body>
 </html>
