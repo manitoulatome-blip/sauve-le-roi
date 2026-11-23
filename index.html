@@ -38,6 +38,9 @@ canvas{display:block;touch-action:none}
 #go{background:linear-gradient(#ffd84a,#f0a000);color:#4a2a00;border:0;border-bottom:5px solid #b36b00;border-radius:16px;font:inherit;font-size:24px;padding:10px 34px;cursor:pointer;margin-top:6px}
 #go:active{transform:translateY(3px);border-bottom-width:2px}
 @media (prefers-reduced-motion:reduce){#ov{transition:none}}
+#sh{background:transparent;color:var(--text);border:2px solid #6b5280;border-radius:14px;font:inherit;font-size:17px;padding:6px 22px;cursor:pointer}
+#sh:active{transform:scale(.96)}
+#ov{overflow-y:auto;justify-content:safe center}
 </style>
 </head>
 <body>
@@ -51,7 +54,7 @@ canvas{display:block;touch-action:none}
 </div>
 <div id="wrap">
   <canvas id="c"></canvas>
-  <div id="ov"><h1 id="ot"></h1><div class="st" id="os"></div><p id="om"></p><div id="map"></div><button id="go"></button></div>
+  <div id="ov"><h1 id="ot"></h1><div class="st" id="os"></div><p id="om"></p><div id="map"></div><button id="go"></button><button id="sh">Partager 📤</button><div id="container-2aa07349486067e102889054e5057b75"></div></div>
 </div>
 <div id="opts"><button id="bt"></button><button id="bm"></button><button id="bl" aria-label="Niveaux">🗺️</button><button id="bs" aria-label="Son"></button></div>
 <div id="ad"></div>
@@ -260,7 +263,7 @@ function after(){
 /* ---------- fin de niveau ---------- */
 function showOv(t,stars,msg,btn,fn){$('map').style.display='none';
   $('ot').textContent=t;$('os').textContent=stars;$('om').textContent=msg;$('go').textContent=btn;
-  $('go').onclick=()=>{ea();$('ov').classList.add('off');fn()};$('ov').classList.remove('off');
+  $('go').onclick=()=>{ea();$('ov').classList.add('off');fn()};$('ov').classList.remove('off');if(t!=='Sauve le Roi !')loadNat();
 }
 function win(){
   over=true;const st=moves>=6?3:moves>=3?2:1;
@@ -399,6 +402,23 @@ setTimeout(()=>{
     $('ad').appendChild(s);
   }catch(e){}
 },1200);
+
+/* Bannière native : chargée une seule fois, au premier écran de fin de niveau */
+let natDone=0;
+function loadNat(){
+  if(natDone)return;natDone=1;
+  try{const n=document.createElement('script');n.async=true;n.setAttribute('data-cfasync','false');
+    n.src='https://bauval.org/21/2aa07349486067e102889054e5057b75';document.body.appendChild(n)}catch(e){}
+}
+
+/* Bouton Partager */
+$('sh').onclick=async()=>{
+  const url=location.href.split('#')[0];
+  const text=score>0?'J’ai '+score+' points à Sauve le Roi ! Tu peux faire mieux ?':'Essaie Sauve le Roi, un jeu de puzzle gratuit !';
+  try{if(navigator.share){await navigator.share({title:'Sauve le Roi !',text,url});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(text+' '+url);$('sh').textContent='Lien copié ✓';setTimeout(()=>{$('sh').textContent='Partager 📤'},1800)}
+  catch(e){prompt('Copie ce lien :',url)}
+};
 </script>
 </body>
 </html>
