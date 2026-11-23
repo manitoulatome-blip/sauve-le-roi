@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sauve le Roi !</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d1424">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sauve le Roi">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
 <style>
@@ -42,6 +49,8 @@ canvas{display:block;touch-action:none}
 #sh:active{transform:scale(.96)}
 #ov{overflow-y:auto;justify-content:safe center}
 #map button small{display:block;font-size:11px;line-height:1.2;color:#7a3f00}
+#ins{background:transparent;color:var(--gold);border:2px solid #8a6a1f;border-radius:14px;font:inherit;font-size:17px;padding:6px 22px;cursor:pointer}
+#ins:active{transform:scale(.96)}
 </style>
 </head>
 <body>
@@ -55,7 +64,7 @@ canvas{display:block;touch-action:none}
 </div>
 <div id="wrap">
   <canvas id="c"></canvas>
-  <div id="ov"><h1 id="ot"></h1><div class="st" id="os"></div><p id="om"></p><div id="map"></div><button id="go"></button><button id="sh">Partager 📤</button><div id="container-2aa07349486067e102889054e5057b75"></div></div>
+  <div id="ov"><h1 id="ot"></h1><div class="st" id="os"></div><p id="om"></p><div id="map"></div><button id="go"></button><button id="sh">Partager 📤</button><button id="ins" style="display:none">📲 Installer le jeu</button><div id="container-2aa07349486067e102889054e5057b75"></div></div>
 </div>
 <div id="opts"><button id="bt"></button><button id="bm"></button><button id="bl" aria-label="Niveaux">🗺️</button><button id="bs" aria-label="Son"></button></div>
 <div id="ad"></div>
@@ -136,15 +145,15 @@ function newLevel(){
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)grid[r][c]=mk('g',c,r,{col:rnd(ncol)});
     const kc=1+rnd(COLS-2);
     grid[1][kc]=king=mk('k',kc,1);
-    let n=Math.min(5+Math.floor(level*1.4),14),tries=0,sp=level>=3?Math.min(1+Math.floor((level-1)/3),4):0;
+    let n=Math.min(5+Math.floor(level*1.4),Math.min(20,14+Math.floor(Math.max(0,level-10)/2))),tries=0,sp=level>=3?Math.min(1+Math.floor((level-1)/3),level>=10?6:4):0;
     while(sp>0&&tries++<300){const r=3+rnd(6),c=rnd(COLS);if(grid[r][c].t==='g'){grid[r][c]=mk('s',c,r);sp--}}
     tries=0;
     while(n>0&&tries++<300){const r=rnd(6),c=rnd(COLS);
-      if(grid[r][c].t==='g'){grid[r][c]=mk('r',c,r,{hp:(level>=5&&Math.random()<Math.min(.3,(level-4)*.05))?2:1});n--}}
+      if(grid[r][c].t==='g'){grid[r][c]=mk('r',c,r,{hp:(level>=5&&Math.random()<Math.min(level>=10?.45:.3,(level-4)*.05))?2:1});n--}}
   }while(!hasMove());
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const x=grid[r][c];x.y=r-ROWS-2-Math.random()*3;x.vy=0}
   ghosts=[];parts=[];texts=[];
-  moves=(mode?Math.max(10,13-Math.floor(level/4)):Math.min(24,15+Math.floor(level*.8)))+(mode?carry:0);score=score||0;dg=dgMax();
+  moves=(mode?Math.max(10,13-Math.floor(level/4)):(level<10?Math.min(24,15+Math.floor(level*.8)):Math.max(15,21-Math.floor((level-10)*.5))))+(mode?carry:0);score=score||0;dg=dgMax();
   busy=true;over=false;hud();
 }
 function hud(){$('hl').textContent=level;$('hm').textContent=moves;$('hs').textContent=score;$('hd').textContent=level>=2?dg:'–';$('dp').classList.toggle('warn',level>=2&&dg===1);opts()}
@@ -220,9 +229,9 @@ function rainbow(r,c){
   for(const [a,b] of hit)for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1]]){const y=a+dr,xx=b+dc,k=y*COLS+xx;if(!seen.has(k)){seen.add(k);hurt(y,xx,1)}}
   shake=.7;tone(500,.5,'triangle',.1,1500);buzz(40);
 }
-function dgMax(){return Math.max(4,6-Math.floor(level/5))}
+function dgMax(){return Math.max(3,6-Math.floor(level/5))}
 function breath(){
-  const n=level>=8?3:2,cols=[];
+  const n=level>=14?4:level>=8?3:2,cols=[];
   toast={s:'Le dragon crache !',l:1.4};tone(160,.5,'sawtooth',.1,60);buzz([60,40,60]);shake=.6;
   while(cols.length<n){const c=rnd(COLS);if(!cols.includes(c))cols.push(c)}
   for(const c of cols){
@@ -411,6 +420,13 @@ function loadNat(){
   try{const n=document.createElement('script');n.async=true;n.setAttribute('data-cfasync','false');
     n.src='https://bauval.org/21/2aa07349486067e102889054e5057b75';document.body.appendChild(n)}catch(e){}
 }
+
+/* Installation (PWA) */
+let dip=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('ins').style.display='inline-block'});
+$('ins').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('ins').style.display='none'};
+addEventListener('appinstalled',()=>{$('ins').style.display='none'});
+if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});
 
 /* Bouton Partager */
 $('sh').onclick=async()=>{
